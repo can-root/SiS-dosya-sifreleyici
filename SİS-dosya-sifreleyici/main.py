@@ -6,217 +6,210 @@ from PyQt5.QtWidgets import (
 )
 from cryptography.fernet import Fernet, InvalidToken
 
-# 256 bitlik anahtar oluşturma
-def generate_key():
-    key = Fernet.generate_key()
-    return key.decode()  # Anahtarı string olarak döndür
+def anahtar_oluştur():
+    anahtar = Fernet.generate_key()
+    return anahtar.decode()
 
-# Dosyayı şifreleme
-def encrypt_file(input_filepath, output_filepath, key):
-    f = Fernet(key.encode())
-    with open(input_filepath, "rb") as file:
-        file_data = file.read()
-    encrypted_data = f.encrypt(file_data)
+def dosya_şifrele(girdi_dosyası_yolu, çıktı_dosyası_yolu, anahtar):
+    f = Fernet(anahtar.encode())
+    with open(girdi_dosyası_yolu, "rb") as dosya:
+        dosya_verisi = dosya.read()
+    şifrelenmiş_veri = f.encrypt(dosya_verisi)
 
-    with open(output_filepath, "wb") as file:
-        file.write(encrypted_data)
+    with open(çıktı_dosyası_yolu, "wb") as dosya:
+        dosya.write(şifrelenmiş_veri)
 
-# Dosyayı şifre çözme
-def decrypt_file(input_filepath, output_filepath, key):
-    f = Fernet(key.encode())
-    with open(input_filepath, "rb") as file:
-        encrypted_data = file.read()
-    decrypted_data = f.decrypt(encrypted_data)
+def dosya_şifresini_çöz(girdi_dosyası_yolu, çıktı_dosyası_yolu, anahtar):
+    f = Fernet(anahtar.encode())
+    with open(girdi_dosyası_yolu, "rb") as dosya:
+        şifrelenmiş_veri = dosya.read()
+    çözülen_veri = f.decrypt(şifrelenmiş_veri)
 
-    with open(output_filepath, "wb") as file:
-        file.write(decrypted_data)
+    with open(çıktı_dosyası_yolu, "wb") as dosya:
+        dosya.write(çözülen_veri)
 
-class FileEncryptor(QWidget):
+class DosyaŞifreleyici(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Dosya Şifreleyici')
-        self.setStyleSheet("background-color: #2E2E2E; color: #FFFFFF;")  # Karanlık tema
-        self.resize(800, 300)  # Genişlik 800
+        self.setStyleSheet("background-color: #2E2E2E; color: #FFFFFF;")
+        self.resize(800, 300)
 
         self.layout = QVBoxLayout()
 
-        # Şifreleme kısmı
-        encrypt_layout = QVBoxLayout()
-        self.input_label = QLabel("Şifrelenecek dosyanın yolunu seçin:")
-        encrypt_layout.addWidget(self.input_label)
+        şifreleme_düzeni = QVBoxLayout()
+        self.girdi_etiket = QLabel("Şifrelenecek dosyanın yolunu seçin:")
+        şifreleme_düzeni.addWidget(self.girdi_etiket)
 
-        self.input_path = QLineEdit(self)
-        self.input_path.setReadOnly(True)  # Sadece okunabilir yap
-        encrypt_layout.addWidget(self.input_path)
+        self.girdi_yolu = QLineEdit(self)
+        self.girdi_yolu.setReadOnly(True)
+        şifreleme_düzeni.addWidget(self.girdi_yolu)
 
-        self.browse_input_button = QPushButton('Gözat...', self)
-        self.browse_input_button.clicked.connect(self.browse_input_file)
-        encrypt_layout.addWidget(self.browse_input_button)
+        self.gözat_girdi_butonu = QPushButton('Gözat...', self)
+        self.gözat_girdi_butonu.clicked.connect(self.browse_input_file)
+        şifreleme_düzeni.addWidget(self.gözat_girdi_butonu)
 
-        self.output_label = QLabel("Şifreli dosyanın kaydedileceği yolu seçin:")
-        encrypt_layout.addWidget(self.output_label)
+        self.çıktı_etiket = QLabel("Şifreli dosyanın kaydedileceği yolu seçin:")
+        şifreleme_düzeni.addWidget(self.çıktı_etiket)
 
-        self.output_path = QLineEdit(self)
-        self.output_path.setReadOnly(True)  # Sadece okunabilir yap
-        encrypt_layout.addWidget(self.output_path)
+        self.çıktı_yolu = QLineEdit(self)
+        self.çıktı_yolu.setReadOnly(True)
+        şifreleme_düzeni.addWidget(self.çıktı_yolu)
 
-        self.browse_output_button = QPushButton('Klasör Seç...', self)
-        self.browse_output_button.clicked.connect(self.browse_output_folder)
-        encrypt_layout.addWidget(self.browse_output_button)
+        self.gözat_çıktı_butonu = QPushButton('Klasör Seç...', self)
+        self.gözat_çıktı_butonu.clicked.connect(self.browse_output_folder)
+        şifreleme_düzeni.addWidget(self.gözat_çıktı_butonu)
 
-        self.key_label = QLabel("Anahtar dosyası yolu:")
-        encrypt_layout.addWidget(self.key_label)
+        self.anahtar_etiket = QLabel("Anahtar dosyası yolu:")
+        şifreleme_düzeni.addWidget(self.anahtar_etiket)
 
-        self.key_path = QLineEdit(self)
-        self.key_path.setReadOnly(True)  # Sadece okunabilir yap
-        encrypt_layout.addWidget(self.key_path)
+        self.anahtar_yolu = QLineEdit(self)
+        self.anahtar_yolu.setReadOnly(True)
+        şifreleme_düzeni.addWidget(self.anahtar_yolu)
 
-        self.browse_key_button = QPushButton('Klasör Seç...', self)
-        self.browse_key_button.clicked.connect(self.browse_key_folder)
-        encrypt_layout.addWidget(self.browse_key_button)
+        self.gözat_anahtar_butonu = QPushButton('Klasör Seç...', self)
+        self.gözat_anahtar_butonu.clicked.connect(self.browse_key_folder)
+        şifreleme_düzeni.addWidget(self.gözat_anahtar_butonu)
 
-        self.encrypt_button = QPushButton('Dosyayı Şifrele', self)
-        self.encrypt_button.clicked.connect(self.encrypt_file)
-        encrypt_layout.addWidget(self.encrypt_button)
+        self.şifrele_butonu = QPushButton('Dosyayı Şifrele', self)
+        self.şifrele_butonu.clicked.connect(self.encrypt_file)
+        şifreleme_düzeni.addWidget(self.şifrele_butonu)
 
-        # Çizgi
-        line = QFrame()
-        line.setFrameShape(QFrame.VLine)
-        line.setFrameShadow(QFrame.Sunken)
+        ayırıcı = QFrame()
+        ayırıcı.setFrameShape(QFrame.VLine)
+        ayırıcı.setFrameShadow(QFrame.Sunken)
 
-        # Şifre çözme kısmı
-        decrypt_layout = QVBoxLayout()
-        self.decrypt_label = QLabel("Şifresi çözülecek dosyanın yolunu seçin:")
-        decrypt_layout.addWidget(self.decrypt_label)
+        şifre_çözme_düzeni = QVBoxLayout()
+        self.şifre_çözme_etiket = QLabel("Şifresi çözülecek dosyanın yolunu seçin:")
+        şifre_çözme_düzeni.addWidget(self.şifre_çözme_etiket)
 
-        self.decrypt_input_path = QLineEdit(self)
-        self.decrypt_input_path.setReadOnly(True)  # Sadece okunabilir yap
-        decrypt_layout.addWidget(self.decrypt_input_path)
+        self.şifre_çözme_girdi_yolu = QLineEdit(self)
+        self.şifre_çözme_girdi_yolu.setReadOnly(True)
+        şifre_çözme_düzeni.addWidget(self.şifre_çözme_girdi_yolu)
 
-        self.browse_decrypt_input_button = QPushButton('Gözat...', self)
-        self.browse_decrypt_input_button.clicked.connect(self.browse_decrypt_input_file)
-        decrypt_layout.addWidget(self.browse_decrypt_input_button)
+        self.gözat_şifre_çözme_butonu = QPushButton('Gözat...', self)
+        self.gözat_şifre_çözme_butonu.clicked.connect(self.browse_decrypt_input_file)
+        şifre_çözme_düzeni.addWidget(self.gözat_şifre_çözme_butonu)
 
-        self.decrypt_output_label = QLabel("Çözülmüş dosyanın kaydedileceği yolu seçin:")
-        decrypt_layout.addWidget(self.decrypt_output_label)
+        self.şifre_çözme_çıktı_etiket = QLabel("Çözülmüş dosyanın kaydedileceği yolu seçin:")
+        şifre_çözme_düzeni.addWidget(self.şifre_çözme_çıktı_etiket)
 
-        self.decrypt_output_path = QLineEdit(self)
-        self.decrypt_output_path.setReadOnly(True)  # Sadece okunabilir yap
-        decrypt_layout.addWidget(self.decrypt_output_path)
+        self.şifre_çözme_çıktı_yolu = QLineEdit(self)
+        self.şifre_çözme_çıktı_yolu.setReadOnly(True)
+        şifre_çözme_düzeni.addWidget(self.şifre_çözme_çıktı_yolu)
 
-        self.browse_decrypt_output_button = QPushButton('Klasör Seç...', self)
-        self.browse_decrypt_output_button.clicked.connect(self.browse_decrypt_folder)
-        decrypt_layout.addWidget(self.browse_decrypt_output_button)
+        self.gözat_şifre_çözme_butonu = QPushButton('Klasör Seç...', self)
+        self.gözat_şifre_çözme_butonu.clicked.connect(self.browse_decrypt_folder)
+        şifre_çözme_düzeni.addWidget(self.gözat_şifre_çözme_butonu)
 
-        self.key_label_decrypt = QLabel("Anahtar dosyasının yolunu seçin:")
-        decrypt_layout.addWidget(self.key_label_decrypt)
+        self.anahtar_etiket_şifre_çözme = QLabel("Anahtar dosyasının yolunu seçin:")
+        şifre_çözme_düzeni.addWidget(self.anahtar_etiket_şifre_çözme)
 
-        self.key_path_decrypt = QLineEdit(self)
-        self.key_path_decrypt.setReadOnly(True)  # Sadece okunabilir yap
-        decrypt_layout.addWidget(self.key_path_decrypt)
+        self.anahtar_yolu_şifre_çözme = QLineEdit(self)
+        self.anahtar_yolu_şifre_çözme.setReadOnly(True)
+        şifre_çözme_düzeni.addWidget(self.anahtar_yolu_şifre_çözme)
 
-        self.browse_key_button_decrypt = QPushButton('Gözat...', self)
-        self.browse_key_button_decrypt.clicked.connect(self.browse_key_file_decrypt)
-        decrypt_layout.addWidget(self.browse_key_button_decrypt)
+        self.gözat_anahtar_butonu_şifre_çözme = QPushButton('Gözat...', self)
+        self.gözat_anahtar_butonu_şifre_çözme.clicked.connect(self.browse_key_file_decrypt)
+        şifre_çözme_düzeni.addWidget(self.gözat_anahtar_butonu_şifre_çözme)
 
-        self.decrypt_button = QPushButton('Dosyanın Şifresini Çöz', self)
-        self.decrypt_button.clicked.connect(self.decrypt_file)
-        decrypt_layout.addWidget(self.decrypt_button)
+        self.şifre_çöz_butonu = QPushButton('Dosyanın Şifresini Çöz', self)
+        self.şifre_çöz_butonu.clicked.connect(self.decrypt_file)
+        şifre_çözme_düzeni.addWidget(self.şifre_çöz_butonu)
 
-        # Ana düzen
-        main_layout = QHBoxLayout()
-        main_layout.addLayout(encrypt_layout)
-        main_layout.addWidget(line)
-        main_layout.addLayout(decrypt_layout)
+        ana_düzen = QHBoxLayout()
+        ana_düzen.addLayout(şifreleme_düzeni)
+        ana_düzen.addWidget(ayırıcı)
+        ana_düzen.addLayout(şifre_çözme_düzeni)
 
-        self.layout.addLayout(main_layout)
+        self.layout.addLayout(ana_düzen)
         self.setLayout(self.layout)
 
-    def show_message(self, title, message):
+    def mesaj_göster(self, başlık, mesaj):
         msg = QMessageBox()
-        msg.setWindowTitle(title)
-        msg.setText(message)
+        msg.setWindowTitle(başlık)
+        msg.setText(mesaj)
         msg.exec_()
 
     def browse_input_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, 'Dosya Seç')
-        if filename:
-            self.input_path.setText(filename)
+        dosya_adi, _ = QFileDialog.getOpenFileName(self, 'Dosya Seç')
+        if dosya_adi:
+            self.girdi_yolu.setText(dosya_adi)
 
     def browse_output_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
-        if folder:
-            original_ext = os.path.splitext(self.input_path.text())[1]  # Orijinal uzantıyı al
-            output_filename = os.path.join(folder, f"şifreli_dosya{original_ext}.enc")  # Varsayılan dosya adı
-            self.output_path.setText(output_filename)
+        klasör = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
+        if klasör:
+            orijinal_uzantı = os.path.splitext(self.girdi_yolu.text())[1]
+            çıktı_dosyası_adi = os.path.join(klasör, f"şifreli_dosya{orijinal_uzantı}.enc")
+            self.çıktı_yolu.setText(çıktı_dosyası_adi)
 
     def browse_key_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
-        if folder:
-            key_filename = os.path.join(folder, "anahtar.txt")  # Varsayılan anahtar dosyası adı
-            self.key_path.setText(key_filename)
+        klasör = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
+        if klasör:
+            anahtar_dosyası_adi = os.path.join(klasör, "anahtar.txt")
+            self.anahtar_yolu.setText(anahtar_dosyası_adi)
 
     def browse_decrypt_input_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, 'Şifresi Çözülecek Dosyayı Seç')
-        if filename:
-            self.decrypt_input_path.setText(filename)
+        dosya_adi, _ = QFileDialog.getOpenFileName(self, 'Şifresi Çözülecek Dosyayı Seç')
+        if dosya_adi:
+            self.şifre_çözme_girdi_yolu.setText(dosya_adi)
 
     def browse_decrypt_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
-        if folder:
-            output_filename = os.path.join(folder, "çözülmüş_dosya" + os.path.splitext(self.decrypt_input_path.text())[1])  # Orijinal uzantıyı koru
-            self.decrypt_output_path.setText(output_filename)
+        klasör = QFileDialog.getExistingDirectory(self, 'Klasör Seç')
+        if klasör:
+            çıktı_dosyası_adi = os.path.join(klasör, "çözülmüş_dosya" + os.path.splitext(self.şifre_çözme_girdi_yolu.text())[1])
+            self.şifre_çözme_çıktı_yolu.setText(çıktı_dosyası_adi)
 
     def browse_key_file_decrypt(self):
-        filename, _ = QFileDialog.getOpenFileName(self, 'Anahtar Dosyasını Seç')
-        if filename:
-            self.key_path_decrypt.setText(filename)
+        dosya_adi, _ = QFileDialog.getOpenFileName(self, 'Anahtar Dosyasını Seç')
+        if dosya_adi:
+            self.anahtar_yolu_şifre_çözme.setText(dosya_adi)
 
     def encrypt_file(self):
-        input_filepath = self.input_path.text()
-        output_filepath = self.output_path.text()
-        key_filepath = self.key_path.text()
+        girdi_dosyası_yolu = self.girdi_yolu.text()
+        çıktı_dosyası_yolu = self.çıktı_yolu.text()
+        anahtar_dosyası_yolu = self.anahtar_yolu.text()
 
-        if not input_filepath or not output_filepath or not key_filepath:
-            self.show_message("Hata", "Lütfen tüm dosya yollarını doldurun.")
+        if not girdi_dosyası_yolu or not çıktı_dosyası_yolu or not anahtar_dosyası_yolu:
+            self.mesaj_göster("Hata", "Lütfen tüm dosya yollarını doldurun.")
             return
 
         try:
-            key = generate_key()
-            encrypt_file(input_filepath, output_filepath, key)
+            anahtar = anahtar_oluştur()
+            dosya_şifrele(girdi_dosyası_yolu, çıktı_dosyası_yolu, anahtar)
 
-            with open(key_filepath, "w") as key_file:
-                key_file.write(key)
+            with open(anahtar_dosyası_yolu, "w") as anahtar_dosyası:
+                anahtar_dosyası.write(anahtar)
 
-            self.show_message("Başarılı", "Dosya başarıyla şifrelendi.")
+            self.mesaj_göster("Başarılı", "Dosya başarıyla şifrelendi.")
         except Exception:
-            self.show_message("Hata", "Şifreleme hatası.")
+            self.mesaj_göster("Hata", "Şifreleme hatası.")
 
     def decrypt_file(self):
-        input_filepath = self.decrypt_input_path.text()
-        output_filepath = self.decrypt_output_path.text()
-        key_filepath = self.key_path_decrypt.text()
+        girdi_dosyası_yolu = self.şifre_çözme_girdi_yolu.text()
+        çıktı_dosyası_yolu = self.şifre_çözme_çıktı_yolu.text()
+        anahtar_dosyası_yolu = self.anahtar_yolu_şifre_çözme.text()
 
-        if not input_filepath or not output_filepath or not key_filepath:
-            self.show_message("Hata", "Lütfen tüm dosya yollarını doldurun.")
+        if not girdi_dosyası_yolu or not çıktı_dosyası_yolu or not anahtar_dosyası_yolu:
+            self.mesaj_göster("Hata", "Lütfen tüm dosya yollarını doldurun.")
             return
 
         try:
-            with open(key_filepath, "r") as key_file:
-                key = key_file.read()
+            with open(anahtar_dosyası_yolu, "r") as anahtar_dosyası:
+                anahtar = anahtar_dosyası.read()
 
-            decrypt_file(input_filepath, output_filepath, key)
-            self.show_message("Başarılı", "Dosyanın şifresi başarıyla çözüldü.")
+            dosya_şifresini_çöz(girdi_dosyası_yolu, çıktı_dosyası_yolu, anahtar)
+            self.mesaj_göster("Başarılı", "Dosyanın şifresi başarıyla çözüldü.")
         except InvalidToken:
-            self.show_message("Hata", "Geçersiz anahtar! Dosya çözülemedi.")
+            self.mesaj_göster("Hata", "Geçersiz anahtar! Dosya çözülemedi.")
         except Exception:
-            self.show_message("Hata", "Şifre çözme hatası.")
+            self.mesaj_göster("Hata", "Şifre çözme hatası.")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = FileEncryptor()
+    ex = DosyaŞifreleyici()
     ex.show()
     sys.exit(app.exec_())
