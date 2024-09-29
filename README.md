@@ -10,3 +10,6 @@ Bu uzantıyı .png yaptığınızda dosyanıza erişebileceksiniz.
 ![resim](https://github.com/user-attachments/assets/a91b5037-e13e-4356-8fa9-9eea6852c362)
 
 
+
+
+Derleme komutu: pyinstaller --onefile --noconsole --icon=ikon.png  main.py  
